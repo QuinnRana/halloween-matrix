@@ -111,7 +111,14 @@
       <section class="panel">
         <div class="panel-body">
           <h2 style="margin:0 0 8px; font-size:18px;">🧾 Save Student Info</h2>
-          <form id="form" aria-describedby="form-help">
+
+        <!-- Admin unlock -->
+	<div style="display:flex; align-items:center; gap:10px; margin:6px 0;">
+  		<button id="adminUnlockBtn" class="btn">🔒 Admin view</button>
+  		<span class="muted" style="font-size:12px;">Student data stays hidden unless unlocked.</span>
+	</div>
+
+	 <form id="form" aria-describedby="form-help">
             <div style="display:grid; gap:8px;">
               <label>Full Name
                 <input class="text" id="name" placeholder="Jane Doe" required>
