@@ -126,8 +126,8 @@
               <label>Student ID (digits)
                 <input class="text" id="sid" placeholder="123456" inputmode="numeric" pattern="\\d{3,32}" required>
               </label>
-              <label>Class / Section (optional)
-                <input class="text" id="klass" placeholder="ENGL-1312 / CIS-2330">
+              <label>College Name
+                <input class="text" id="college" placeholder="e.g., University of the Incarnate Word">
               </label>
               <p id="err" style="color:#ffb3b3; font-size:13px; min-height: 1em;"></p>
               <p id="form-help" class="muted">Saved only on this device (browser storage). Export CSV for backups.</p>
@@ -289,6 +289,8 @@
 
     el('form').addEventListener('submit', (e)=>{
       e.preventDefault();
+	const scareOverlay = document.getElementById('scareOverlay');
+	const myersAudio  = document.getElementById('myersAudio');
       const name = el('name').value.trim();
       const sid  = el('sid').value.trim();
       const klass= el('klass').value.trim();
@@ -316,5 +318,21 @@
       announce('Exported CSV');
     });
   </script>
+
+  <!-- Scare overlay + audio -->
+  <audio id="myersAudio" src="myers-theme.mp3" preload="auto"></audio>
+
+  <div id="scareOverlay"
+       style="position:fixed; inset:0; background:#000; display:none; align-items:center; justify-content:center;
+              z-index:9999; color:#fff; font:700 28px system-ui; text-align:center; transition:opacity .4s;">
+    <div>
+      <div style="font-size:56px; margin-bottom:12px;">🎃</div>
+      Happy Halloween...
+    </div>
+  </div>
+
+</body>
+</html>
+
 </body>
 </html>
