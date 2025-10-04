@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0b10" />
+  <title>Halloween Matrix 🎃</title>
+  <style>
+    :root { --bg: #0b0b10; --ring: rgba(255,255,255,0.12); --panel: rgba(255,255,255,0.06); --text: #fff; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", emoji; color: var(--text); background: var(--bg); }
+    header { position: sticky; top: 0; backdrop-filter: blur(10px); background: rgba(0,0,0,0.4); border-bottom: 1px solid var(--ring); z-index: 20; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 12px; }
+    .row { display: grid; grid-template-columns: 1fr; gap: 16px; padding: 16px 0; }
+    @media (min-width: 1024px) { .row { grid-template-columns: 2fr 1fr; gap: 24px; } }
+    .panel { background: var(--panel); border: 1px solid var(--ring); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
+    .controls { position: absolute; inset-inline: 0; top: 0; z-index: 10; padding: 8px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .control { font-size: 14px; padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid var(--ring); color: #fff; }
+    .control:focus { outline: 2px solid rgba(255,255,255,0.6); outline-offset: 2px; }
+    button.control { cursor: pointer; }
+    label.control { display: inline-flex; align-items: center; gap: 8px; }
+    canvas { display: block; width: 100%; height: 60vh; }
+    @media (min-width: 640px) { canvas { height: 65vh; } }
+    @media (min-width: 768px) { canvas { height: 70vh; } }
+    .canvas-wrap { position: relative; }
+    .bg-picker { position: absolute; right: 10px; bottom: 10px; z-index: 10; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.4); border: 1px solid var(--ring); padding: 6px 8px; border-radius: 10px; font-size: 12px; }
+    .panel-body { padding: 16px; }
+    h1 { font-size: 22px; margin: 0; }
+    .brand { display:flex; align-items:center; gap:10px; padding: 10px 0; }
+    .muted { opacity: 0.8; font-size: 12px; margin-left: auto; }
+    /* Form/Table */
+    form .text { width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--ring); background: rgba(0,0,0,0.4); color: #fff; }
+    .btn { padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid var(--ring); cursor: pointer; }
+    .btn:focus { outline: 2px solid rgba(255,255,255,0.6); outline-offset: 2px; }
+    .btn.danger { background: rgba(255, 64, 64, 0.18); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead { position: sticky; top: 0; background: rgba(255,255,255,0.1); }
+    th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--ring); }
+    tbody tr:nth-child(odd) { background: rgba(255,255,255,0.06); }
+    footer { opacity: 0.7; font-size: 12px; padding: 0 12px 20px; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  </style>
+  <link rel="preload" href="https://fonts.gstatic.com/s/notoemoji/latest/NotoColorEmoji[wght].ttf" as="font" type="font/ttf" crossorigin>
+</head>
+<body>
+  <header>
+    <div class="container brand">
+      <div style="font-size:24px">🎃</div>
+      <h1>Halloween Matrix</h1>
+      <div class="muted">Interactive • Mobile-ready • CSV Export</div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div aria-live="polite" id="live" class="sr-only"></div>
+
+    <div class="row">
+      <section class="panel">
+        <div class="canvas-wrap">
+          <div class="controls">
+            <button id="toggle" class="control" aria-pressed="false">Pause (Space)</button>
+            <label class="control">Palette
+              <select id="palette" class="control">
+                <option value="pumpkin">Pumpkin</option>
+                <option value="witch">Witch</option>
+                <option value="slime">Slime</option>
+                <option value="candy">Candy</option>
+              </select>
+            </label>
+            <label class="control">Emojis
+              <select id="emojiSet" class="control">
+                <option value="classic">Classic</option>
+                <option value="cute">Cute</option>
+                <option value="spooky">Extra Spooky</option>
+              </select>
+            </label>
+            <label class="control">Speed
+              <select id="speed" class="control">
+                <option value="0.7">Slow</option>
+                <option value="1" selected>Normal</option>
+                <option value="1.5">Fast</option>
+                <option value="2">Ludicrous</option>
+              </select>
+            </label>
+            <label class="control">Size
+              <select id="fontSize" class="control">
+                <option value="22">Small</option>
+                <option value="28" selected>Medium</option>
+                <option value="36">Large</option>
+                <option value="48">XL</option>
+              </select>
+            </label>
+            <label class="control">Density
+              <select id="density" class="control">
+                <option value="0.5">Sparse</option>
+                <option value="0.7">Comfort</option>
+                <option value="0.9" selected>Dense</option>
+                <option value="1.2">Storm</option>
+              </select>
+            </label>
+            <label class="control"><input type="checkbox" id="glow" checked> Glow</label>
+          </div>
+          <canvas id="matrix" aria-label="Halloween emoji rain animation"></canvas>
+          <div class="bg-picker"><label>BG <input type="color" id="bg" value="#0b0b10" aria-label="Background color"></label></div>
+        </div>
+        <div class="panel-body">
+          <p class="muted">Tip: On phones, the animation adapts to your screen height. If you prefer less motion, enable “Reduce Motion” in your device settings and it will pause.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-body">
+          <h2 style="margin:0 0 8px; font-size:18px;">🧾 Save Student Info</h2>
+          <form id="form" aria-describedby="form-help">
+            <div style="display:grid; gap:8px;">
+              <label>Full Name
+                <input class="text" id="name" placeholder="Jane Doe" required>
+              </label>
+              <label>Student ID (digits)
+                <input class="text" id="sid" placeholder="123456" inputmode="numeric" pattern="\\d{3,32}" required>
+              </label>
+              <label>Class / Section (optional)
+                <input class="text" id="klass" placeholder="ENGL-1312 / CIS-2330">
+              </label>
+              <p id="err" style="color:#ffb3b3; font-size:13px; min-height: 1em;"></p>
+              <p id="form-help" class="muted">Saved only on this device (browser storage). Export CSV for backups.</p>
+              <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                <button class="btn" type="submit">Save</button>
+                <button class="btn" type="button" id="export">Export CSV</button>
+                <button class="btn danger" type="button" id="clear" style="margin-left:auto;">Clear All</button>
+              </div>
+            </div>
+          </form>
+
+          <div style="max-height:340px; overflow:auto; margin-top:12px; border:1px solid var(--ring); border-radius:12px;">
+            <table id="table">
+              <thead>
+                <tr><th>Name</th><th>Student ID</th><th>Class</th><th>Saved</th><th>Action</th></tr>
+              </thead>
+              <tbody id="tbody">
+                <tr><td colspan="5" style="text-align:center; padding:12px; opacity:0.7;">No students saved yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="container">Built for phones, tablets, and desktops 👻 — supports reduced motion and keyboard shortcuts (Space to pause).</footer>
+
+  <script>
+    // ---------- Settings & State ----------
+    const palettes = {
+      pumpkin: { main: "#ff8a00", fade: "rgba(255,138,0,0.08)" },
+      witch:   { main: "#9b5cff", fade: "rgba(155,92,255,0.08)" },
+      slime:   { main: "#00ff85", fade: "rgba(0,255,133,0.08)" },
+      candy:   { main: "#ff4da6", fade: "rgba(255,77,166,0.08)" },
+    };
+    const sets = {
+      classic: ["🎃","👻","🦇","🕷️","💀","🕸️","🧛","🧟","🪦","🩸"],
+      cute:    ["🎃","👻","🦇","🧙‍♀️","🧙‍♂️","🧹","🪄","🍬","🍭","🕸️"],
+      spooky:  ["💀","🦴","🧟","🧛","🩸","🪦","⚰️","🕷️","👁️","🦇"],
+    };
+
+    let running = true;
+    let fontSize = 28;
+    let speed = 1;
+    let density = 0.9;
+    let glow = true;
+    let palette = "pumpkin";
+    let emojiSet = "classic";
+    let bg = "#0b0b10";
+    const emojis = () => sets[emojiSet];
+
+    const live = document.getElementById('live');
+
+    // Reduced motion preference
+    const rm = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (rm.matches) running = false;
+    rm.addEventListener?.('change', () => { if (rm.matches) running = false; });
+
+    // ---------- Canvas Setup ----------
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+    let drops = [];
+    let vels = [];
+
+    function sizeCanvas() {
+      const parent = canvas.parentElement;
+      const w = parent.clientWidth;
+      const h = Math.max(parent.clientHeight, Math.floor(window.innerHeight * 0.6));
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      initColumns(w);
+    }
+    function initColumns(w) {
+      const cols = Math.max(1, Math.floor(w / fontSize));
+      drops = new Array(cols).fill(0).map(() => Math.random() * -20);
+      vels  = new Array(cols).fill(0).map(() => (0.8 + Math.random()*0.6) * speed * (0.7 + density*0.6));
+    }
+
+    const ro = new ResizeObserver(sizeCanvas);
+    ro.observe(canvas.parentElement);
+    sizeCanvas();
+
+    // ---------- Controls ----------
+    const el = (id)=>document.getElementById(id);
+    el('toggle').addEventListener('click', ()=>{ running = !running; el('toggle').innerText = running ? 'Pause (Space)' : 'Resume (Space)'; el('toggle').setAttribute('aria-pressed', String(!running)); });
+    el('palette').addEventListener('change', (e)=> palette = e.target.value);
+    el('emojiSet').addEventListener('change', (e)=> emojiSet = e.target.value);
+    el('speed').addEventListener('change', (e)=> speed = Number(e.target.value));
+    el('fontSize').addEventListener('change', (e)=> { fontSize = Number(e.target.value); sizeCanvas(); });
+    el('density').addEventListener('change', (e)=> density = Number(e.target.value));
+    el('glow').addEventListener('change', (e)=> glow = e.target.checked);
+    el('bg').addEventListener('input', (e)=> { bg = e.target.value; document.documentElement.style.setProperty('--bg', bg); });
+
+    window.addEventListener('keydown', (e)=>{
+      if (e.code === 'Space') { e.preventDefault(); el('toggle').click(); }
+    }, {passive:false});
+
+    // ---------- Animation Loop ----------
+    function step() {
+      const { fade, main } = palettes[palette];
+      // Fade background
+      ctx.fillStyle = fade;
+      ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+
+      ctx.font = `${fontSize}px system-ui, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", emoji`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+
+      for (let i=0; i<drops.length; i++) {
+        const x = i * fontSize + fontSize/2;
+        const y = drops[i] * fontSize;
+        const ch = emojis()[(Math.random() * emojis().length) | 0];
+
+        if (glow) { ctx.shadowColor = main; ctx.shadowBlur = 12; } else { ctx.shadowBlur = 0; }
+        ctx.fillStyle = main;
+        ctx.fillText(ch, x, y);
+
+        drops[i] += vels[i] * 0.05;
+        const limit = canvas.clientHeight / fontSize + 2;
+        if (drops[i] > limit && Math.random() < 0.08) {
+          drops[i] = -Math.random() * 20;
+          vels[i]  = (0.8 + Math.random()*0.6) * speed * (0.7 + density*0.6);
+        }
+      }
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+
+    // ---------- Student Storage ----------
+    const STORAGE_KEY = 'halloween-matrix-students';
+    function readStudents(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); } catch { return []; } }
+    function writeStudents(data){ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+    function announce(msg){ live.textContent = msg; setTimeout(()=> live.textContent = '', 1200); }
+
+    const tbody = el('tbody');
+    function renderTable() {
+      const data = readStudents();
+      tbody.innerHTML = '';
+      if (data.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td'); td.colSpan = 5; td.style.textAlign='center'; td.style.opacity='0.7'; td.style.padding='12px'; td.textContent='No students saved yet.';
+        tr.appendChild(td); tbody.appendChild(tr); return;
+      }
+      for (const s of data) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.sid)}</td><td>${escapeHtml(s.klass||'—')}</td><td>${new Date(s.at).toLocaleString()}</td><td></td>`;
+        const btn = document.createElement('button'); btn.className='btn'; btn.textContent='Delete';
+        btn.addEventListener('click', ()=>{ writeStudents(readStudents().filter(x=>x.id!==s.id)); renderTable(); announce('Deleted a student'); });
+        tr.lastChild.appendChild(btn); tbody.appendChild(tr);
+      }
+    }
+    function escapeHtml(str){ return String(str).replace(/[&<>\"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[s])); }
+    renderTable();
+
+    el('form').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const name = el('name').value.trim();
+      const sid  = el('sid').value.trim();
+      const klass= el('klass').value.trim();
+      const err  = el('err');
+      if (name.length < 2) { err.textContent='Please enter a full name (min 2 characters).'; return; }
+      if (!/^\\d{3,32}$/.test(sid)) { err.textContent='Student ID must be 3–32 digits.'; return; }
+      err.textContent='';
+      const entry = { id: crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2)+Date.now().toString(36), name, sid, klass, at: new Date().toISOString() };
+      const data = readStudents(); data.unshift(entry); writeStudents(data); renderTable();
+      el('name').value=''; el('sid').value=''; el('klass').value='';
+      announce('Saved student ' + name);
+    });
+
+    el('clear').addEventListener('click', ()=>{
+      if (confirm('Clear all saved students?')) { writeStudents([]); renderTable(); announce('Cleared all students'); }
+    });
+
+    el('export').addEventListener('click', ()=>{
+      const header = ['Name','StudentID','Class','SavedAt'];
+      const rows = readStudents().map(s => [s.name, s.sid, s.klass||'', s.at]);
+      const csv = [header, ...rows].map(r => r.map(x => '\"'+String(x).replaceAll('\"','\"\"')+'\"').join(',')).join('\\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='students_halloween_matrix.csv'; a.click(); URL.revokeObjectURL(url);
+      announce('Exported CSV');
+    });
+  </script>
+</body>
+</html>

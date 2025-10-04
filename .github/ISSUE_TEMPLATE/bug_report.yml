@@ -1,0 +1,24 @@
+name: Bug report
+description: File a bug report
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Tell us what you expected vs. what you got.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      value: |
+        1. Go to '...'
+        2. Click '...'
+        3. See error
+  - type: input
+    id: browser
+    attributes:
+      label: Browser/OS
+      placeholder: "e.g., iPhone iOS 18 / Safari"
